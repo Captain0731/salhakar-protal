@@ -200,7 +200,22 @@ class ApiService {
           return { response, data, serverId: server.id };
         } else {
           console.log(`⚠️ ${server.id} server returned status ${response.status}, trying next server...`);
-          // If it's a 401, don't try other servers (auth issue)
+          
+          // For authentication endpoints (login, signup), don't try other servers on 400/401 errors
+          // These indicate invalid credentials, not server issues
+          const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/signup');
+          if (isAuthEndpoint && (response.status === 400 || response.status === 401 || response.status === 403)) {
+            let errorData = {};
+            try {
+              errorData = await response.json();
+            } catch (e) {
+              errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+            }
+            console.log(`❌ Authentication error from ${server.id} server (${response.status}), not trying fallback`);
+            return { response, data: errorData, serverId: server.id, error: true };
+          }
+          
+          // For other 401 errors (non-auth endpoints), don't try other servers
           if (response.status === 401) {
             let errorData = {};
             try {
@@ -210,6 +225,7 @@ class ApiService {
             }
             return { response, data: errorData, serverId: server.id, error: true };
           }
+          
           // For other errors, continue to next server
         }
       } catch (error) {
@@ -392,8 +408,16 @@ class ApiService {
   async login(email, password) {
     console.log('🔐 Login attempt for:', email);
     
+    // Validate inputs
+    if (!email || !email.trim()) {
+      throw new Error('Email is required');
+    }
+    if (!password || !password.trim()) {
+      throw new Error('Password is required');
+    }
+    
     try {
-      const { response, data: result, serverId } = await this.fetchWithFallback('/auth/login', {
+      const { response, data: result, serverId, error: hasError } = await this.fetchWithFallback('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -401,18 +425,50 @@ class ApiService {
         body: JSON.stringify({ email, password })
       });
 
-      if (result.access_token) {
-        this.accessToken = result.access_token;
-        this.refreshToken = result.refresh_token;
-        localStorage.setItem('access_token', result.access_token);
-        localStorage.setItem('refresh_token', result.refresh_token);
-        console.log(`✅ Login successful from ${serverId} server, tokens stored`);
+      // Check if there was an error in the response
+      if (hasError || !response.ok) {
+        // Extract error message from response
+        let errorMessage = 'Invalid email or password';
+        if (result && result.detail) {
+          errorMessage = typeof result.detail === 'string' ? result.detail : JSON.stringify(result.detail);
+        } else if (result && result.message) {
+          errorMessage = typeof result.message === 'string' ? result.message : JSON.stringify(result.message);
+        } else if (result && result.error) {
+          errorMessage = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
+        }
+        console.error(`❌ Login failed from ${serverId} server:`, errorMessage);
+        throw new Error(errorMessage);
       }
+
+      // Verify that access_token exists - this is critical for authentication
+      if (!result || !result.access_token) {
+        console.error('❌ Login response missing access_token');
+        throw new Error('Invalid credentials. Please check your email and password.');
+      }
+
+      // Only store tokens if we have a valid access_token
+      this.accessToken = result.access_token;
+      this.refreshToken = result.refresh_token;
+      localStorage.setItem('access_token', result.access_token);
+      localStorage.setItem('refresh_token', result.refresh_token);
+      console.log(`✅ Login successful from ${serverId} server, tokens stored`);
       
       return result;
     } catch (error) {
-      console.error('❌ Login failed on all servers:', error);
-      throw error;
+      // Clear any tokens if login failed
+      this.clearAllTokens();
+      console.error('❌ Login failed on all servers:', error.message);
+      
+      // Re-throw with user-friendly message
+      if (error.message.includes('Invalid') || error.message.includes('credentials') || error.message.includes('password')) {
+        throw error; // Already has a good message
+      } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        throw new Error('Invalid email or password. Please try again.');
+      } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection and try again.');
+      } else {
+        throw new Error(error.message || 'Login failed. Please check your credentials.');
+      }
     }
   }
 
@@ -1176,60 +1232,92 @@ class ApiService {
     return await this.handleResponse(response);
   }
 
-  // Central Acts API (public access)
+  // Central Acts API (public access) - Enhanced with Elasticsearch support
   async getCentralActs(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${this.baseURL}/api/acts/central-acts?${queryString}`, {
-      method: 'GET',
-      headers: this.getPublicHeaders()
-    });
-
-    return await this.handleResponse(response);
-  }
-
-  // State Acts API (public access)
-  async getStateActs(params = {}) {
-    console.log('🌐 getStateActs called with params:', params);
+    console.log('🌐 getCentralActs called with params:', params);
     
     try {
-      console.log('🌐 Making real API call for State Acts');
       const queryParams = new URLSearchParams();
       
       // Add pagination parameters
       if (params.limit) queryParams.append('limit', params.limit);
-      if (params.offset) queryParams.append('offset', params.offset);
+      if (params.offset !== undefined) queryParams.append('offset', params.offset);
       
-      // Add search and filter parameters
-      if (params.search) queryParams.append('search', params.search);
+      // Add traditional filter parameters
+      if (params.act_id) queryParams.append('act_id', params.act_id);
       if (params.short_title) queryParams.append('short_title', params.short_title);
-      if (params.state) queryParams.append('state', params.state);
-      if (params.act_number) queryParams.append('act_id', params.act_number); // Changed to act_id for State Acts API
-      if (params.act_id) queryParams.append('act_id', params.act_id); // Support direct act_id parameter
       if (params.year) queryParams.append('year', params.year);
+      if (params.ministry) queryParams.append('ministry', params.ministry);
       if (params.department) queryParams.append('department', params.department);
       
-      const url = `${this.baseURL}/api/acts/state-acts?${queryParams.toString()}`;
-      console.log('🌐 State Acts API URL:', url);
+      // Add Elasticsearch search parameters
+      if (params.search) {
+        queryParams.append('search', params.search);
+        console.log('🔍 Using Elasticsearch full-text search:', params.search);
+      }
+      if (params.highlight !== undefined) {
+        queryParams.append('highlight', params.highlight.toString());
+      }
       
-      const response = await fetch(url, {
+      const endpoint = `/api/acts/central-acts?${queryParams.toString()}`;
+      console.log('🌐 Central Acts API endpoint:', endpoint);
+      
+      // Use fetchWithFallback for automatic server switching
+      const { data, serverId } = await this.fetchWithFallback(endpoint, {
         method: 'GET',
         headers: this.getPublicHeaders()
       });
       
-      console.log('🌐 Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('🌐 State Acts API Error Response:', errorText);
-        throw new Error(`State Acts API request failed: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('🌐 State Acts API response:', data);
+      console.log(`🌐 Central Acts response received from ${serverId} server:`, data);
       
       return data;
     } catch (error) {
-      console.error('🌐 State Acts API call failed:', error);
+      console.error('🌐 Central Acts API call failed on all servers:', error);
+      throw error;
+    }
+  }
+
+  // State Acts API (public access) - Enhanced with Elasticsearch support
+  async getStateActs(params = {}) {
+    console.log('🌐 getStateActs called with params:', params);
+    
+    try {
+      const queryParams = new URLSearchParams();
+      
+      // Add pagination parameters
+      if (params.limit) queryParams.append('limit', params.limit);
+      if (params.offset !== undefined) queryParams.append('offset', params.offset);
+      
+      // Add traditional filter parameters
+      if (params.state) queryParams.append('state', params.state);
+      if (params.act_number) queryParams.append('act_number', params.act_number);
+      if (params.short_title) queryParams.append('short_title', params.short_title);
+      if (params.year) queryParams.append('year', params.year);
+      if (params.department) queryParams.append('department', params.department);
+      
+      // Add Elasticsearch search parameters
+      if (params.search) {
+        queryParams.append('search', params.search);
+        console.log('🔍 Using Elasticsearch full-text search:', params.search);
+      }
+      if (params.highlight !== undefined) {
+        queryParams.append('highlight', params.highlight.toString());
+      }
+      
+      const endpoint = `/api/acts/state-acts?${queryParams.toString()}`;
+      console.log('🌐 State Acts API endpoint:', endpoint);
+      
+      // Use fetchWithFallback for automatic server switching
+      const { data, serverId } = await this.fetchWithFallback(endpoint, {
+        method: 'GET',
+        headers: this.getPublicHeaders()
+      });
+      
+      console.log(`🌐 State Acts response received from ${serverId} server:`, data);
+      
+      return data;
+    } catch (error) {
+      console.error('🌐 State Acts API call failed on all servers:', error);
       throw error;
     }
   }
@@ -1243,6 +1331,46 @@ class ApiService {
     };
     
     return await this.getStateActs(params);
+  }
+
+  // Elasticsearch-only search endpoint for Central Acts
+  async searchActsElasticsearch(params = {}) {
+    console.log('🔍 searchActsElasticsearch called with params:', params);
+    
+    try {
+      const queryParams = new URLSearchParams();
+      
+      // Required parameter: search query
+      if (!params.q && !params.query) {
+        throw new Error('Search query (q or query) is required');
+      }
+      const searchQuery = params.q || params.query;
+      queryParams.append('q', searchQuery);
+      
+      // Optional parameters
+      if (params.size) queryParams.append('size', params.size.toString());
+      if (params.year_from) queryParams.append('year_from', params.year_from.toString());
+      if (params.year_to) queryParams.append('year_to', params.year_to.toString());
+      if (params.highlight !== undefined) {
+        queryParams.append('highlight', params.highlight.toString());
+      }
+      
+      const endpoint = `/api/acts/search?${queryParams.toString()}`;
+      console.log('🔍 Elasticsearch search endpoint:', endpoint);
+      
+      // Use fetchWithFallback for automatic server switching
+      const { data, serverId } = await this.fetchWithFallback(endpoint, {
+        method: 'GET',
+        headers: this.getPublicHeaders()
+      });
+      
+      console.log(`🔍 Elasticsearch search response received from ${serverId} server:`, data);
+      
+      return data;
+    } catch (error) {
+      console.error('🔍 Elasticsearch search failed on all servers:', error);
+      throw error;
+    }
   }
 
   // Enhanced Judgements API with cursor-based pagination

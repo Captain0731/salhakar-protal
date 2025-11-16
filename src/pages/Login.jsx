@@ -126,6 +126,11 @@ export default function Login() {
     try {
       const data = await apiService.login(loginData.phoneOrEmail, loginData.password);
       
+      // CRITICAL: Verify that access_token exists before proceeding
+      if (!data || !data.access_token) {
+        throw new Error('Invalid credentials. Please check your email and password.');
+      }
+      
       // Store user data in auth context with proper field mapping according to API documentation
       const userData = {
         name: data.user?.name || "User",
@@ -154,6 +159,12 @@ export default function Login() {
         access_token: data.access_token,
         refresh_token: data.refresh_token
       };
+      
+      // Verify tokens before storing
+      if (!tokens.access_token || !tokens.refresh_token) {
+        throw new Error('Authentication failed. Invalid token received.');
+      }
+      
       await login(userData, tokens);
       
       setMessage("Login successful! Redirecting...");
@@ -162,8 +173,10 @@ export default function Login() {
       }, 1500);
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");
+      setMessage("");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleForgotPassword = () => {
