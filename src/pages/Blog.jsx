@@ -395,7 +395,7 @@ const Blog = () => {
         )}
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

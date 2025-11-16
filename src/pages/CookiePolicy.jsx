@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/landing/Navbar';
 import Footer from '../components/landing/Footer';
 
 const CookiePolicy = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Scroll to cookie-policy-section if hash is present in URL
+    if (location.hash === '#cookie-policy-section') {
+      setTimeout(() => {
+        const element = document.getElementById('cookie-policy-section');
+        if (element) {
+          const offset = 100; // Account for navbar height
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen pt-28" style={{ backgroundColor: '#F9FAFC' }}>
       <Navbar />
-      <div className="w-full max-w-7xl mx-auto px-4 py-8 border-2 border-gray-200 shadow-lg">
+      <div id="cookie-policy-section" className="w-full max-w-7xl mx-auto px-4 py-8 border-2 border-gray-200 shadow-lg" style={{ scrollMarginTop: '100px' }}>
         <h1 className="text-2xl font-bold mb-4" style={{ color: '#1E65AD', fontFamily: "'Heebo', 'Helvetica Hebrew Bold', sans-serif" }}>
           Cookie Policy
         </h1>

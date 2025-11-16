@@ -37,9 +37,9 @@ const Footer = () => {
     //   { name: "Case Studies", href: "/case-studies" }
     // ],
     legal: [
-      { name: "Privacy Policy", href: "/privacy-policy" },
-      { name: "Terms of Service", href: "/terms-of-service" },
-      { name: "Cookie Policy", href: "/cookie-policy" }
+      { name: "Privacy Policy", href: "/privacy-policy#privacy-policy-section" },
+      { name: "Terms of Service", href: "/terms-of-service#terms-of-service-section" },
+      { name: "Cookie Policy", href: "/cookie-policy#cookie-policy-section" }
     ]
   };
 

@@ -23,14 +23,18 @@ const Stats = () => {
       suffix: "+"
     },
     {
-      number: "24/7",
+      number: "24",
       unit: "/7",
       label: "Consumer Support",
       suffix: ""
     }
   
   ];
-  const [countedStats, setCountedStats] = useState(stats.map(stat => {
+  const [countedStats, setCountedStats] = useState(stats.map((stat, index) => {
+    // Handle special case for "24/7"
+    if (stat.number === "24" && stat.unit === "/7") {
+      return "24";
+    }
     const num = parseInt(stat.number);
     return isNaN(num) ? stat.number : num;
   }));
@@ -38,8 +42,13 @@ const Stats = () => {
   // Count up animation
   useEffect(() => {
     if (isVisible) {
-      // Reset to 0 then count up
-      setCountedStats([0, 0, 0, 0]);
+      // Reset to 0 then count up (except for 24/7 which stays as is)
+      setCountedStats(stats.map((stat, index) => {
+        if (stat.number === "24" && stat.unit === "/7") {
+          return "24/7";
+        }
+        return 0;
+      }));
       
       setTimeout(() => {
         const duration = 2000; // 2 seconds
@@ -48,8 +57,17 @@ const Stats = () => {
         const timers = [];
         
         stats.forEach((stat, index) => {
+          // Handle special case for "24/7" - set directly without animation
+          if (stat.number === "24" && stat.unit === "/7") {
+            setCountedStats(prev => {
+              const newStats = [...prev];
+              newStats[index] = "24/7";
+              return newStats;
+            });
+            return;
+          }
           const target = parseInt(stat.number);
-          // Skip animation for non-numeric values like "24/7"
+          // Skip animation for non-numeric values
           if (isNaN(target)) {
             return;
           }
@@ -146,34 +164,64 @@ const Stats = () => {
                 <div className="relative z-10">
                   {/* Number with Counter Animation */}
                   <div 
-                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-2 sm:mb-3 transition-all duration-300"
+                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-2 sm:mb-3 transition-all duration-300 notranslate"
+                    translate="no"
                     style={{ 
                       fontFamily: 'Helvetica Hebrew Bold, sans-serif',
                       color: '#1E65AD',
                       position: 'relative'
                     }}
                   >
-                    <span style={{ 
-                      display: 'inline-block',
-                      color: '#1E65AD',
-                      textShadow: '0 2px 8px rgba(30, 101, 173, 0.2)'
-                    }}>
-                      {countedStats[index]}
-                    </span>
-                    {stat.unit && (
-                      <span style={{ 
-                        display: 'inline-block',
-                        color: '#1E65AD',
-                        textShadow: '0 2px 8px rgba(30, 101, 173, 0.2)'
-                      }}>{stat.unit}</span>
-                    )}
-                    {stat.suffix && (
-                      <span style={{ 
-                        color: '#CF9B63',
-                        marginLeft: '2px',
-                        display: 'inline-block',
-                        fontWeight: 'bold'
-                      }}>{stat.suffix}</span>
+                    {/* Display number - handle 24/7 special case */}
+                    {countedStats[index] === "24/7" ? (
+                      <span 
+                        className="notranslate"
+                        translate="no"
+                        style={{ 
+                          display: 'inline-block',
+                          color: '#1E65AD',
+                          textShadow: '0 2px 8px rgba(30, 101, 173, 0.2)'
+                        }}
+                      >
+                        24/7
+                      </span>
+                    ) : (
+                      <>
+                        <span 
+                          className="notranslate"
+                          translate="no"
+                          style={{ 
+                            display: 'inline-block',
+                            color: '#1E65AD',
+                            textShadow: '0 2px 8px rgba(30, 101, 173, 0.2)'
+                          }}
+                        >
+                          {countedStats[index]}
+                        </span>
+                        {stat.unit && (
+                          <span 
+                            className="notranslate"
+                            translate="no"
+                            style={{ 
+                              display: 'inline-block',
+                              color: '#1E65AD',
+                              textShadow: '0 2px 8px rgba(30, 101, 173, 0.2)'
+                            }}
+                          >{stat.unit}</span>
+                        )}
+                        {stat.suffix && (
+                          <span 
+                            className="notranslate"
+                            translate="no"
+                            style={{ 
+                              color: '#CF9B63',
+                              marginLeft: '2px',
+                              display: 'inline-block',
+                              fontWeight: 'bold'
+                            }}
+                          >{stat.suffix}</span>
+                        )}
+                      </>
                     )}
                   </div>
                   

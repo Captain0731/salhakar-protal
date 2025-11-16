@@ -176,8 +176,8 @@ const Navbar = () => {
   return (
     <nav ref={navRef} className={`fixed top-0 left-0 right-0 z-[9999] border-b transition-all duration-500 ease-in-out ${
       isScrolled 
-        ? 'bg-white shadow-xl py-1.5 sm:py-2 md:bg-white/70 md:backdrop-blur-lg opacity-95' 
-        : 'bg-white shadow-lg py-2 sm:py-3 md:py-4 md:bg-white/90 md:backdrop-blur-md opacity-95'
+        ? 'bg-white shadow-xl py-1.5 sm:py-2 md:bg-white/20 md:backdrop-blur-lg' 
+        : 'bg-white shadow-lg py-2 sm:py-3 md:py-4 md:bg-white/90 md:backdrop-blur-md'
     }`} style={{ borderColor: '#E5E7EB' }}>
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 flex justify-between items-center">
         
@@ -237,7 +237,7 @@ const Navbar = () => {
         {/* Nav Links */}
         <ul
           className={`flex-col md:flex-row md:flex gap-1 sm:gap-2 items-center absolute md:static left-0 w-full md:w-auto bg-white md:bg-transparent md:backdrop-blur-lg p-4 sm:p-6 md:p-0 transition-all duration-500 ease-out shadow-2xl md:shadow-none rounded-2xl md:rounded-none border-t md:border-t-0  ${
-            isScrolled ? 'top-12 sm:top-14 md:top-16 md:bg-white/2 md:backdrop-blur-lg' : 'top-14 sm:top-16 md:top-20 md:bg-white/20 md:backdrop-blur-md'
+            isScrolled ? 'top-12 sm:top-14 md:top-16 md:bg-white/70 md:backdrop-blur-lg' : 'top-14 sm:top-16 md:top-20 md:bg-white/90 md:backdrop-blur-md'
           } ${menuOpen ? "flex opacity-100 translate-y-0" : "hidden md:flex opacity-0 md:opacity-100 -translate-y-2 md:translate-y-0"}`}
           style={{ borderTopColor: '#E5E7EB', zIndex: 9999 }}
         >
