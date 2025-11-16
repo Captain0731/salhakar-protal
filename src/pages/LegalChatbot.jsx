@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/landing/Navbar";
 import { 
-  Send, Bot, User, X, RotateCcw, Mic, MicOff, Upload, 
-  Search, Code, Image, BookOpen, Globe, Copy, ThumbsUp, 
+  Send, User, X, RotateCcw, Mic, MicOff, Upload, 
+  Code, Image, BookOpen, Globe, Copy, ThumbsUp, 
   ThumbsDown, Save, MoreVertical, ArrowLeft, RefreshCw, 
   Edit, Paperclip, ChevronRight, HelpCircle, Building2, 
-  SquareStack, Lightbulb, Settings, Share2, Shuffle
+  SquareStack, Lightbulb, Settings, Share2, Shuffle, Square
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -26,6 +26,7 @@ export default function LegalChatbot() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const fileInputRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   const quickQuestions = [
     "What are my rights as a tenant?",
@@ -80,6 +81,28 @@ export default function LegalChatbot() {
     }
   }, [isTyping, scrollToBottom]);
 
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
+    setIsTyping(false);
+    
+    // Add a message indicating the generation was stopped
+    const stoppedMessage = {
+      id: Date.now() + 1,
+      text: "Response generation stopped.",
+      sender: "bot",
+      timestamp: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, stoppedMessage]);
+    
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+  };
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || loading) return;
 
@@ -102,18 +125,44 @@ export default function LegalChatbot() {
     setLoading(true);
     setIsTyping(true);
 
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     try {
-      // Call the AI Assistant API
-      const response = await apiService.llmChat(currentInput);
+      // Call the AI Assistant API with abort signal
+      const baseURL = apiService.baseURL || 'https://operantly-unchattering-ernie.ngrok-free.dev';
+      const token = localStorage.getItem('access_token') || localStorage.getItem('accessToken') || localStorage.getItem('token');
+      const endpoint = `${baseURL}/ai_assistant`;
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({ 
+          message: currentInput,
+          limit: 10
+        }),
+        signal: signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
       
       const botResponse = {
         id: Date.now() + 1,
-        text: response.reply || "I'm sorry, I couldn't process your request. Please try again.",
+        text: data.reply || "I'm sorry, I couldn't process your request. Please try again.",
         sender: "bot",
         timestamp: new Date().toISOString(),
-        usedTools: response.used_tools || false,
-        toolUsed: response.tool_used || null,
-        searchInfo: response.search_info || null
+        usedTools: data.used_tools || false,
+        toolUsed: data.tool_used || null,
+        searchInfo: data.search_info || null
       };
 
       setMessages(prev => [...prev, botResponse]);
@@ -123,6 +172,12 @@ export default function LegalChatbot() {
         scrollToBottom();
       }, 100);
     } catch (error) {
+      // Don't show error if request was aborted
+      if (error.name === 'AbortError') {
+        console.log('Request aborted by user');
+        return;
+      }
+      
       console.error('Error getting bot response:', error);
       const errorResponse = {
         id: Date.now() + 1,
@@ -139,6 +194,7 @@ export default function LegalChatbot() {
     } finally {
       setLoading(false);
       setIsTyping(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -403,7 +459,7 @@ export default function LegalChatbot() {
           {/* Messages Container - Modern Chat Layout */}
                 <div 
                   ref={messagesContainerRef}
-                  className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-6 sm:py-8 md:py-10 lg:py-12 pb-28 sm:pb-8 md:pb-10 lg:pb-12 space-y-5 sm:space-y-6 md:space-y-8 w-full"
+                  className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-6 sm:py-8 md:py-10 lg:py-12 pb-28 sm:pb-8 md:pb-10 lg:pb-12 space-y-5 sm:space-y-6 md:space-y-8 w-auto h-auto"
                   style={{ 
                     scrollbarWidth: 'thin',
                     scrollbarColor: '#CBD5E1 #F9FAFC',
@@ -422,12 +478,11 @@ export default function LegalChatbot() {
                       >
                 {message.sender === 'user' ? (
                           /* User Message - Modern Bubble Design */
-                          <div className="max-w-[85%] sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%] ml-auto flex items-end gap-2 sm:gap-3">
-                            <div className="flex-1"></div>
+                          <div className="max-w-[85%] sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%] ml-auto flex items-end justify-end">
                             <div 
                               className="rounded-2xl sm:rounded-3xl px-4 sm:px-5 py-3 sm:py-3.5 shadow-lg" 
                               style={{ 
-                                background: 'linear-gradient(135deg, #1E65AD 0%, #1a5a9a 100%)',
+                                background: 'linear-gradient(135deg,rgb(200, 200, 200) 0%,rgb(109, 110, 111) 100%)',
                                 border: 'none',
                                 boxShadow: '0 4px 12px rgba(30, 101, 173, 0.25)'
                               }}
@@ -442,18 +497,12 @@ export default function LegalChatbot() {
                         {message.text}
                       </p>
                     </div>
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
-                              <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            </div>
                   </div>
                 ) : (
                           /* AI Response - Modern Card Design */
-                          <div className="max-w-[65%] sm:max-w-[65%] md:max-w-[60%] lg:max-w-[50%] w-full flex items-start gap-2 sm:gap-3">
-                            <div className="w-10 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 via-blue-600 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="rounded-2xl sm:rounded-3xl bg-white shadow-lg overflow-hidden border border-gray-100 px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6" style={{
+                          <div className="flex items-start">
+                            <div className="inline-block max-w-[85%] sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]">
+                              <div className="rounded-2xl sm:rounded-3xl bg-white shadow-lg overflow-hidden border border-gray-100 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3" style={{
                                 boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)'
                               }}>
                       {/* AI Response Content */}
@@ -464,18 +513,18 @@ export default function LegalChatbot() {
                             fontFamily: "'Roboto', sans-serif", 
                                       color: '#1F2937',
                                       fontSize: '15px',
-                                      lineHeight: '1.8'
+                                      lineHeight: '1.6'
                           }}
                               >
                                 <ReactMarkdown
                                   components={{
-                              p: ({ children }) => <p style={{ marginBottom: '0.75rem', marginTop: '0.75rem' }}>{children}</p>,
-                              h1: ({ children }) => <h1 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '0.75rem', color: '#1F2937' }}>{children}</h1>,
-                              h2: ({ children }) => <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '0.75rem', color: '#1F2937' }}>{children}</h2>,
-                              h3: ({ children }) => <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '0.5rem', color: '#1F2937' }}>{children}</h3>,
-                              ul: ({ children }) => <ul style={{ marginLeft: '1rem', marginBottom: '0.75rem', marginTop: '0.75rem', listStyleType: 'disc' }}>{children}</ul>,
-                              ol: ({ children }) => <ol style={{ marginLeft: '1rem', marginBottom: '0.75rem', marginTop: '0.75rem', listStyleType: 'decimal' }}>{children}</ol>,
-                              li: ({ children }) => <li style={{ marginBottom: '0.375rem', color: '#1F2937' }}>{children}</li>,
+                              p: ({ children }) => <p style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}>{children}</p>,
+                              h1: ({ children }) => <h1 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.375rem', marginTop: '0.5rem', color: '#1F2937' }}>{children}</h1>,
+                              h2: ({ children }) => <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.375rem', marginTop: '0.5rem', color: '#1F2937' }}>{children}</h2>,
+                              h3: ({ children }) => <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem', marginTop: '0.375rem', color: '#1F2937' }}>{children}</h3>,
+                              ul: ({ children }) => <ul style={{ marginLeft: '1rem', marginBottom: '0.5rem', marginTop: '0.5rem', listStyleType: 'disc' }}>{children}</ul>,
+                              ol: ({ children }) => <ol style={{ marginLeft: '1rem', marginBottom: '0.5rem', marginTop: '0.5rem', listStyleType: 'decimal' }}>{children}</ol>,
+                              li: ({ children }) => <li style={{ marginBottom: '0.25rem', color: '#1F2937' }}>{children}</li>,
                                     code: ({ children, className }) => {
                                       const isInline = !className;
                                       return isInline ? (
@@ -491,13 +540,13 @@ export default function LegalChatbot() {
                                         <code style={{ 
                                           display: 'block',
                                     backgroundColor: '#F9FAFB', 
-                                    padding: '0.75rem', 
+                                    padding: '0.5rem', 
                                     borderRadius: '0.375rem',
                                           fontSize: '0.8125em',
                                           fontFamily: 'monospace',
                                           overflowX: 'auto',
-                                    marginTop: '0.75rem',
-                                    marginBottom: '0.75rem',
+                                    marginTop: '0.5rem',
+                                    marginBottom: '0.5rem',
                                     color: '#1F2937',
                                     border: '1px solid #E5E7EB'
                                         }}>{children}</code>
@@ -508,8 +557,8 @@ export default function LegalChatbot() {
                                   borderLeft: '3px solid #E5E7EB', 
                                   paddingLeft: '0.75rem', 
                                         marginLeft: '0',
-                                  marginTop: '0.75rem',
-                                  marginBottom: '0.75rem',
+                                  marginTop: '0.5rem',
+                                  marginBottom: '0.5rem',
                                   color: '#6B7280',
                                   backgroundColor: '#F9FAFB',
                                   padding: '0.5rem 0.75rem',
@@ -552,17 +601,14 @@ export default function LegalChatbot() {
                     ))}
                   </AnimatePresence>
                   
-                  {/* Modern Typing Indicator */}
-                  {isTyping && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-start gap-2 sm:gap-3"
-                    >
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 via-blue-600 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                        <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                          </div>
-                      <div>
+                   {/* Modern Typing Indicator */}
+                   {isTyping && (
+                     <motion.div
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       className="flex items-start"
+                     >
+                       <div>
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <motion.div 
                             className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full"
@@ -591,10 +637,10 @@ export default function LegalChatbot() {
                 </div>
 
             {/* Modern Input Area - Bottom Fixed */}
-            <div className="fixed sm:relative bottom-0 left-0 right-0 sm:left-auto sm:right-auto bg-white border-t px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-4 sm:py-5 md:py-6 pb-4 sm:pb-6 md:pb-8 lg:pb-10 z-50 mobile-input-safe-area" style={{ 
-              borderColor: '#E5E7EB',
-              boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
-              background: 'linear-gradient(to top, #FFFFFF 0%, #F9FAFC 100%)'
+            <div className="fixed sm:relative bottom-0 left-0 right-0 sm:left-auto sm:right-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-4 sm:py-5 md:py-6 pb-4 sm:pb-6 md:pb-8 lg:pb-10 z-50 mobile-input-safe-area" style={{ 
+              backgroundColor: 'transparent',
+              border: 'none',
+              boxShadow: 'none'
             }}>
               {/* Voice Recording Waveform Indicator */}
               {isRecording && (
@@ -641,7 +687,12 @@ export default function LegalChatbot() {
                   <div className="flex items-center h-[64px] sm:h-[72px] px-4 sm:px-5 md:px-6">
                     {/* Search Icon */}
                     <div className="flex items-center flex-shrink-0 mr-2 sm:mr-3">
-                      <Search className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: '#9CA3AF' }} />
+                      <img 
+                        src="/uit3.GIF" 
+                        alt="Search" 
+                        className="w-20 h-20 sm:w-6 sm:h-6 object-contain"
+                        style={{ maxWidth: '100%', height: 'auto' }}
+                      />
                         </div>
 
                     {/* Input Field */}
@@ -687,29 +738,46 @@ export default function LegalChatbot() {
                           <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
                         )}
                       </button>
-                      <motion.button
-                        onClick={handleSendMessage}
-                        disabled={loading || isProcessingVoice || !inputMessage.trim()}
-                        whileHover={{ scale: !loading && !isProcessingVoice && inputMessage.trim() ? 1.05 : 1 }}
-                        whileTap={{ scale: !loading && !isProcessingVoice && inputMessage.trim() ? 0.95 : 1 }}
-                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ 
-                          background: loading || isProcessingVoice || !inputMessage.trim() 
-                            ? 'linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%)'
-                            : 'linear-gradient(135deg, #1E65AD 0%, #1a5a9a 100%)',
-                          color: 'white',
-                          boxShadow: loading || isProcessingVoice || !inputMessage.trim()
-                            ? 'none'
-                            : '0 4px 12px rgba(30, 101, 173, 0.3)'
-                        }}
-                        title="Send message"
-                      >
-                        {(loading || isProcessingVoice) ? (
-                          <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                      {(loading || isTyping) ? (
+                        <motion.button
+                          onClick={handleStopGeneration}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all"
+                          style={{ 
+                            background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                            color: 'white',
+                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+                          }}
+                          title="Stop generation"
+                        >
+                          <Square className="w-4 h-4 sm:w-5 sm:h-5" fill="white" />
+                        </motion.button>
+                      ) : (
+                        <motion.button
+                          onClick={handleSendMessage}
+                          disabled={isProcessingVoice || !inputMessage.trim()}
+                          whileHover={{ scale: !isProcessingVoice && inputMessage.trim() ? 1.05 : 1 }}
+                          whileTap={{ scale: !isProcessingVoice && inputMessage.trim() ? 0.95 : 1 }}
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ 
+                            background: isProcessingVoice || !inputMessage.trim() 
+                              ? 'linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%)'
+                              : 'linear-gradient(135deg, #1E65AD 0%, #1a5a9a 100%)',
+                            color: 'white',
+                            boxShadow: isProcessingVoice || !inputMessage.trim()
+                              ? 'none'
+                              : '0 4px 12px rgba(30, 101, 173, 0.3)'
+                          }}
+                          title="Send message"
+                        >
+                          {isProcessingVoice ? (
+                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                          )}
+                        </motion.button>
                       )}
-                      </motion.button>
                     </div>
                   </div>
 
