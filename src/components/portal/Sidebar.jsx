@@ -16,7 +16,8 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  MessageSquare
 } from 'lucide-react';
 import UserIcon from '../UserIcon';
 
@@ -138,6 +139,12 @@ const Sidebar = ({ isOpen, onClose, isMobile, isCollapsed, onToggleCollapse }) =
       label: 'YouTube Summarizer',
       icon: Youtube,
       path: '/youtube-summary'
+    },
+    {
+      id: 'chatbot',
+      label: 'Legal Chatbot',
+      icon: MessageSquare,
+      path: '/legal-chatbot'
     }
   ];
 
