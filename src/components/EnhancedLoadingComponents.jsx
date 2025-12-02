@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 /**
  * Enhanced loading components with smooth animations and modern design
@@ -195,11 +196,42 @@ export const EnhancedInfiniteScrollLoader = ({
   }
 
   return (
-    <div className="flex items-center justify-center py-8 px-4">
-      <div className="text-gray-500 text-sm">
-        Scroll down to load more judgments
-      </div>
-    </div>
+    <motion.div 
+      className="flex items-center justify-center py-8 px-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        duration: 0.6, 
+        ease: [0.4, 0, 0.2, 1]
+      }}
+    >
+      <motion.div 
+        className="text-gray-500 text-sm flex items-center gap-2"
+        animate={{ 
+          opacity: [0.6, 1, 0.6],
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <motion.span
+          animate={{ 
+            y: [0, -4, 0],
+          }}
+          transition={{ 
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="text-lg"
+        >
+          ↓
+        </motion.span>
+        <span>Scroll down to load more Mapping </span>
+      </motion.div>
+    </motion.div>
   );
 };
 

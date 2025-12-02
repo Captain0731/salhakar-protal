@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/landing/Navbar";
 import apiService from "../services/api";
 import { motion } from "framer-motion";
 
@@ -136,19 +135,18 @@ export default function YoutubeVideoSummary() {
 
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      <div className="p-6 pt-24">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
-              YouTube Video Summary
-            </h1>
-            <p className="text-lg" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif' }}>
-              Get AI-powered summaries of YouTube videos to quickly understand key content and insights
-            </p>
-          </div>
+    <div className="w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
+      <div className="w-full max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
+            YouTube Video Summary
+          </h1>
+          <div className="w-16 h-1 mb-4" style={{ backgroundColor: '#CF9B63' }}></div>
+          <p className="text-sm md:text-base" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif' }}>
+            Get AI-powered summaries of YouTube videos to quickly understand key content and insights
+          </p>
+        </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
@@ -409,6 +407,5 @@ export default function YoutubeVideoSummary() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

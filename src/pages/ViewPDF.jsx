@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import Navbar from "../components/landing/Navbar";
 import BookmarkButton from "../components/BookmarkButton";
 import SummaryPopup from "../components/SummaryPopup";
 import apiService from "../services/api";
@@ -527,8 +526,7 @@ export default function ViewPDF() {
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
-        <div className="pt-16 sm:pt-20 flex justify-center items-center h-96">
+        <div className="flex justify-center items-center h-96">
           <div className="text-center px-4">
             <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-gray-900 mx-auto"></div>
             <p className="mt-3 sm:mt-4 text-gray-600 text-sm sm:text-base">Loading PDF...</p>
@@ -541,8 +539,7 @@ export default function ViewPDF() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
-        <div className="pt-16 sm:pt-20 flex justify-center items-center h-96 px-4">
+        <div className="flex justify-center items-center h-96 px-4">
           <div className="text-center max-w-md w-full">
             <div className="text-red-600 text-base sm:text-lg mb-3 sm:mb-4 font-semibold">Error loading PDF</div>
             <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">{error}</p>
@@ -561,8 +558,7 @@ export default function ViewPDF() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      <div className="pt-16 sm:pt-20">
+      <div>
 
       {/* Responsive Layout: Stacked on mobile, side-by-side on desktop */}
       <div className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6" style={{ minHeight: 'calc(100vh - 80px)', height: isMobile ? 'auto' : 'calc(100vh - 80px)', overflow: isMobile ? 'visible' : 'hidden' }}>

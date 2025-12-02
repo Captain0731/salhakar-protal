@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, 
   Download, 
   Calendar as CalendarIcon, 
   Bookmark, 
   FileText as Note,
-  Menu, 
-  X, 
   ChevronRight,
   FileText,
   Clock,
@@ -19,9 +17,10 @@ import {
   Plus,
   Eye,
   Share2,
-  MoreVertical
+  MoreVertical,
+  BookOpen,
+  Map
 } from 'lucide-react';
-import Navbar from '../components/landing/Navbar';
 import Calendar from '../components/dashboard/Calendar';
 import Bookmarks from '../components/dashboard/Bookmarks';
 import Notes from '../components/dashboard/Notes';
@@ -30,8 +29,23 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, user } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
+  
+  // Get tab from URL query parameter
+  const getTabFromURL = () => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    return (tab === 'notes' || tab === 'bookmarks' || tab === 'calendar') ? tab : 'home';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getTabFromURL());
+  
+  // Update activeTab when URL changes
+  useEffect(() => {
+    const tab = getTabFromURL();
+    setActiveTab(tab);
+  }, [location.search]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [bookmarksLoading, setBookmarksLoading] = useState(false);
@@ -175,67 +189,147 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Quick Access Buttons - Notes, Bookmarks, Calendar */}
+            <div className="mb-6 sm:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                {/* Notes Button */}
+                <button
+                  onClick={() => {
+                    setActiveTab('notes');
+                    navigate('/dashboard?tab=notes', { replace: true });
+                  }}
+                  className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                    activeTab === 'notes' 
+                      ? 'bg-blue-50 border-blue-500 shadow-md' 
+                      : 'bg-white border-gray-200 hover:border-blue-300'
+                  }`}
+                >
+                  <div className={`p-2 sm:p-3 rounded-lg flex-shrink-0 ${activeTab === 'notes' ? 'bg-blue-600' : 'bg-blue-100'}`}>
+                    <Note className={`h-5 w-5 sm:h-6 sm:w-6 ${activeTab === 'notes' ? 'text-white' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="text-sm sm:text-base font-semibold mb-1" style={{ 
+                      color: activeTab === 'notes' ? '#1E65AD' : '#374151',
+                      fontFamily: 'Helvetica Hebrew Bold, sans-serif' 
+                    }}>
+                      Notes
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      {notesLoading ? 'Loading...' : `${notesCount} note${notesCount !== 1 ? 's' : ''}`}
+                    </p>
+                  </div>
+                  <ChevronRight className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${activeTab === 'notes' ? 'text-blue-600' : 'text-gray-400'}`} />
+                </button>
+
+                {/* Bookmarks Button */}
+                <button
+                  onClick={() => {
+                    setActiveTab('bookmarks');
+                    navigate('/dashboard?tab=bookmarks', { replace: true });
+                  }}
+                  className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                    activeTab === 'bookmarks' 
+                      ? 'bg-orange-50 border-orange-500 shadow-md' 
+                      : 'bg-white border-gray-200 hover:border-orange-300'
+                  }`}
+                >
+                  <div className={`p-2 sm:p-3 rounded-lg flex-shrink-0 ${activeTab === 'bookmarks' ? 'bg-orange-500' : 'bg-orange-100'}`}>
+                    <Bookmark className={`h-5 w-5 sm:h-6 sm:w-6 ${activeTab === 'bookmarks' ? 'text-white' : 'text-orange-600'}`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="text-sm sm:text-base font-semibold mb-1" style={{ 
+                      color: activeTab === 'bookmarks' ? '#CF9B63' : '#374151',
+                      fontFamily: 'Helvetica Hebrew Bold, sans-serif' 
+                    }}>
+                      Bookmarks
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      {bookmarksLoading ? 'Loading...' : `${bookmarks.length} bookmark${bookmarks.length !== 1 ? 's' : ''}`}
+                    </p>
+                  </div>
+                  <ChevronRight className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${activeTab === 'bookmarks' ? 'text-orange-600' : 'text-gray-400'}`} />
+                </button>
+
+                {/* Calendar Button */}
+                <button
+                  onClick={() => {
+                    setActiveTab('calendar');
+                    navigate('/dashboard?tab=calendar', { replace: true });
+                  }}
+                  className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                    activeTab === 'calendar' 
+                      ? 'bg-green-50 border-green-500 shadow-md' 
+                      : 'bg-white border-gray-200 hover:border-green-300'
+                  }`}
+                >
+                  <div className={`p-2 sm:p-3 rounded-lg flex-shrink-0 ${activeTab === 'calendar' ? 'bg-green-600' : 'bg-green-100'}`}>
+                    <CalendarIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${activeTab === 'calendar' ? 'text-white' : 'text-green-600'}`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="text-sm sm:text-base font-semibold mb-1" style={{ 
+                      color: activeTab === 'calendar' ? '#10B981' : '#374151',
+                      fontFamily: 'Helvetica Hebrew Bold, sans-serif' 
+                    }}>
+                      Calendar
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      View events & schedule
+                    </p>
+                  </div>
+                  <ChevronRight className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${activeTab === 'calendar' ? 'text-green-600' : 'text-gray-400'}`} />
+                </button>
+              </div>
+            </div>
+
             {/* Perfect Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Downloads</p>
-                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>0</p>
-                    <p className="text-xs sm:text-sm text-gray-500 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>No downloads yet</p>
-                  </div>
-                  <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm flex-shrink-0 ml-2" style={{ backgroundColor: '#1E65AD' }}>
-                    <Download className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Bookmarks</p>
-                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#CF9B63', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
-                      {bookmarksLoading ? '...' : bookmarks.length}
-                    </p>
-                    <p className="text-xs sm:text-sm text-green-600 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      {bookmarks.length > 0 ? 'Active bookmarks' : 'No bookmarks yet'}
-                    </p>
-                  </div>
-                  <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm flex-shrink-0 ml-2" style={{ backgroundColor: '#CF9B63' }}>
-                    <Bookmark className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Upcoming Events</p>
-                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#8C969F', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>0</p>
-                    <p className="text-xs sm:text-sm text-gray-500 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>No events scheduled</p>
-                  </div>
-                  <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm flex-shrink-0 ml-2" style={{ backgroundColor: '#8C969F' }}>
-                    <CalendarIcon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Legal Judgment Card */}
               <button
-                onClick={() => setActiveTab('notes')}
+                onClick={() => navigate('/judgment-access')}
                 className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Notes</p>
-                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
-                      {notesLoading ? '...' : notesCount}
-                    </p>
-                    <p className="text-xs sm:text-sm text-gray-500 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      {notesCount > 0 ? 'View all notes' : 'No notes yet'}
-                    </p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Legal Judgment</p>
+                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>16M+</p>
+                    <p className="text-xs sm:text-sm text-gray-500 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Search judgments</p>
                   </div>
                   <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm flex-shrink-0 ml-2" style={{ backgroundColor: '#1E65AD' }}>
                     <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                </div>
+              </button>
+
+              {/* Law Library Card */}
+              <button
+                onClick={() => navigate('/law-library')}
+                className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Law Library</p>
+                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#CF9B63', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>11K+</p>
+                    <p className="text-xs sm:text-sm text-gray-500 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Browse acts</p>
+                  </div>
+                  <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm flex-shrink-0 ml-2" style={{ backgroundColor: '#CF9B63' }}>
+                    <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                </div>
+              </button>
+
+              {/* Law Mapping Card */}
+              <button
+                onClick={() => navigate('/law-mapping')}
+                className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Law Mapping</p>
+                    <p className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1" style={{ color: '#8C969F', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>2.5K+</p>
+                    <p className="text-xs sm:text-sm text-gray-500 font-medium truncate" style={{ fontFamily: 'Roboto, sans-serif' }}>Mapping types</p>
+                  </div>
+                  <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm flex-shrink-0 ml-2" style={{ backgroundColor: '#8C969F' }}>
+                    <Map className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                   </div>
                 </div>
               </button>
@@ -356,141 +450,17 @@ const Dashboard = () => {
     }
   };
 
-  const sidebarItems = [
-    { id: 'home', label: 'Dashboard', icon: Home },
-    { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
-    { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
-    { id: 'notes', label: 'Notes', icon: Note },
-  ];
-
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      
-      <div className="flex h-screen" style={{ paddingTop: '80px' }}>
-        {/* Perfect Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-56 sm:w-64 bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`} style={{ top: '80px', height: 'calc(100vh - 80px)' }}>
-          <div className="h-full flex flex-col border-r border-gray-200">
-            {/* Logo and Dashboard Button */}
-            <div className="p-4 sm:p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="flex items-center">
-                  <img 
-                    src="/logo7.svg" 
-                    alt="Salhakar Logo" 
-                    className="h-10 w-auto sm:h-12 object-contain mr-2 sm:mr-3"
-                  />
-                  {/* <span className="text-base sm:text-lg font-bold" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>Salhakar</span> */}
-                </div>
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
-                >
-                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
-                </button>
-              </div>
-              
-              {/* Dashboard Button */}
-              <button
-                onClick={() => {
-                  setActiveTab('home');
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 ${
-                  activeTab === 'home'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                style={{ fontFamily: 'Roboto, sans-serif' }}
-              >
-                <Home className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 ${activeTab === 'home' ? 'text-white' : 'text-gray-600'}`} />
-                <span className="font-semibold text-sm sm:text-base">Dashboard</span>
-                {activeTab === 'home' && (
-                  <div className="ml-auto w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white"></div>
-                )}
-              </button>
-            </div>
-
-            {/* Navigation Menu */}
-            <nav className="flex-1 p-3 sm:p-4 overflow-y-auto">
-              <div className="space-y-1">
-                {sidebarItems.filter(item => item.id !== 'home').map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
-                      activeTab === item.id
-                        ? 'bg-gray-100 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                    style={{ fontFamily: 'Roboto, sans-serif' }}
-                  >
-                    <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 ${
-                      activeTab === item.id ? 'text-blue-600' : 'text-gray-500'
-                    }`} />
-                    <span>{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </nav>
-
-            {/* Premium Card */}
-            <div className="p-3 sm:p-4 border-t border-gray-200">
-              <div className="bg-gradient-to-r rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-md" style={{ 
-                background: 'linear-gradient(135deg, #1E65AD, #CF9B63)' 
-              }}>
-                <div className="flex items-center mb-2 sm:mb-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-white/20 flex items-center justify-center mr-2 sm:mr-3">
-                    <Bookmark className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-white" style={{ fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>Premium</h3>
-                    <p className="text-xs text-white/90" style={{ fontFamily: 'Roboto, sans-serif' }}>Unlock all features</p>
-                  </div>
-                </div>
-                <button className="w-full py-2 sm:py-2.5 bg-white text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" style={{ 
-                  color: '#1E65AD', 
-                  fontFamily: 'Roboto, sans-serif' 
-                }}>
-                  Upgrade Now
-                </button>
-              </div>
-            </div>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6" style={{ backgroundColor: '#F9FAFC' }}>
+      {/* Main Content */}
+      <div className="w-full">
+        {/* Content Area */}
+        <main className="w-full" style={{ backgroundColor: '#F9FAFC' }}>
+          <div className="w-full">
+            {renderContent()}
           </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Content Area */}
-          <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#F9FAFC' }}>
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-              {renderContent()}
-            </div>
-          </main>
-        </div>
+        </main>
       </div>
-
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setSidebarOpen(true)}
-        className="fixed top-20 right-4 lg:hidden z-50 p-3 sm:p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-        aria-label="Open menu"
-      >
-        <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
-      </button>
     </div>
   );
 };

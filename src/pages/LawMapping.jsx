@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../components/landing/Navbar";
 import apiService from "../services/api";
 import useSmoothInfiniteScroll from "../hooks/useSmoothInfiniteScroll";
 import { 
@@ -469,26 +468,45 @@ export default function LawMapping() {
   const mappingTypeLabel = mappingTypes.find(m => m.value === mappingType)?.label || "Law Mapping";
 
   return (
-    <div className="min-h-screen animate-fade-in-up" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      
+    <div className="w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
       {/* Enhanced Header Section */}
-      <div className="bg-white border-b border-gray-200 pt-14 sm:pt-16 md:pt-20 animate-slide-in-bottom">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 lg:py-12">
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 animate-fade-in-up" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
-              Law Mapping
-            </h1>
-            <div className="w-12 sm:w-16 md:w-20 h-1 mx-auto mb-3 sm:mb-4 md:mb-6 animate-fade-in-up" style={{ backgroundColor: '#CF9B63', animationDelay: '0.2s' }}></div>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg max-w-3xl mx-auto px-2 animate-fade-in-up" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif', animationDelay: '0.4s' }}>
-              Navigate the transition from old legal codes to new ones. Map sections between IPC-BNS, IEA-BSA, and CrPC-BNSS.
-            </p>
-          </div>
+      <motion.div 
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
+      >
+        <div className="text-center">
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3" 
+            style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}
+          >
+            Law Mapping
+          </motion.h1>
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: 64 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            className="h-1 mx-auto mb-4" 
+            style={{ backgroundColor: '#CF9B63' }}
+          ></motion.div>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-sm md:text-base max-w-3xl mx-auto" 
+            style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif' }}
+          >
+            Navigate the transition from old legal codes to new ones. Map sections between IPC-BNS, IEA-BSA, and CrPC-BNSS.
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="p-3 sm:p-4 md:p-5 lg:p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full max-w-full overflow-x-hidden">
+        <div className="w-full">
 
           {/* Mapping Type Selector */}
           {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
@@ -497,9 +515,9 @@ export default function LawMapping() {
 
           {/* Enhanced Search and Filter Section */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 mb-3 sm:mb-4 md:mb-6 lg:mb-8"
           >
             <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
@@ -508,7 +526,12 @@ export default function LawMapping() {
               </h2>
               
               {/* Toggle Button - Three Options */}
-              <div className="relative w-full flex items-center bg-gray-100 rounded-xl p-0.5 sm:p-1 shadow-inner">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="relative w-full flex items-center bg-gray-100 rounded-xl p-0.5 sm:p-1 shadow-inner"
+              >
                   {/* Sliding background indicator */}
                   <motion.div
                     className="absolute top-0.5 bottom-0.5 sm:top-1 sm:bottom-1 rounded-lg z-0"
@@ -519,12 +542,13 @@ export default function LawMapping() {
                     }}
                     transition={{ 
                       type: "spring", 
-                      stiffness: 300, 
-                      damping: 30 
+                      stiffness: 400, 
+                      damping: 25,
+                      mass: 0.8
                     }}
                     style={{
                       width: 'calc(33.33% - 2px)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                      boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)',
                     }}
                   />
                   
@@ -573,16 +597,21 @@ export default function LawMapping() {
                   >
                     CrPC ↔ BNSS
                   </motion.button>
-                </div>
+                </motion.div>
             </div>
             
             {/* Search Bar */}
-            <div className="mb-3 sm:mb-4 md:mb-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className="mb-3 sm:mb-4 md:mb-6"
+            >
               {/* <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
                 Search Mappings
               </label> */}
               <div className="relative">
-                <input
+                <motion.input
                   type="text"
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
@@ -593,7 +622,9 @@ export default function LawMapping() {
                       applyFilters();
                     }
                   }}
-                  className="w-full px-3 sm:px-4 md:px-4 py-2 sm:py-2.5 md:py-3 pl-9 sm:pl-10 md:pl-12 pr-9 sm:pr-10 md:pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base md:text-base lg:text-lg"
+                  whileFocus={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full px-3 sm:px-4 md:px-4 py-2 sm:py-2.5 md:py-3 pl-9 sm:pl-10 md:pl-12 pr-9 sm:pr-10 md:pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm sm:text-base md:text-base lg:text-lg"
                   style={{ fontFamily: 'Roboto, sans-serif' }}
                 />
                 <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
@@ -615,7 +646,7 @@ export default function LawMapping() {
                   </svg>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Dynamic Filters - Hidden by default, shown when showFilters is true */}
             <AnimatePresence>
@@ -753,9 +784,9 @@ export default function LawMapping() {
 
           {/* Enhanced Results Section */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1 }}
+            initial={{ opacity: 0, y: 30, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4 md:mb-6">
@@ -828,12 +859,18 @@ export default function LawMapping() {
             </AnimatePresence>
 
             {loading && mappings.length === 0 ? (
-              <SkeletonGrid count={3} />
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <SkeletonGrid count={3} />
+              </motion.div>
             ) : mappings.length === 0 && !error ? (
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 className="text-center py-16"
               >
                 <div className="w-20 h-20 mx-auto mb-6 bg-blue-50 rounded-full flex items-center justify-center">
@@ -920,55 +957,81 @@ export default function LawMapping() {
                   return (
                     <motion.div
                       key={mapping.id || `mapping-${index}`}
-                      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 40, scale: 0.92, rotateX: -5 }}
+                      animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                      exit={{ opacity: 0, y: -30, scale: 0.92, rotateX: 5 }}
                       transition={{ 
-                        duration: 0.4, 
-                        delay: index * 0.05,
-                        ease: [0.4, 0, 0.2, 1]
+                        duration: 0.5, 
+                        delay: index * 0.03,
+                        ease: [0.25, 0.46, 0.45, 0.94]
                       }}
                       whileHover={{ 
-                        y: -4, 
-                        scale: 1.01,
-                        transition: { duration: 0.2 }
+                        y: -6, 
+                        scale: 1.02,
+                        transition: { duration: 0.3, ease: "easeOut" }
                       }}
-                      whileTap={{ scale: 0.98 }}
+                      whileTap={{ scale: 0.98, y: -2 }}
                     >
-                      <div 
+                      <motion.div 
                         onClick={() => viewMappingDetails(mapping)}
-                        className="border border-gray-200 rounded-lg p-2.5 sm:p-4 md:p-5 lg:p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-300 bg-white group cursor-pointer"
+                        className="border border-gray-200 rounded-lg p-2.5 sm:p-4 md:p-5 lg:p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-300 bg-white group cursor-pointer"
+                        whileHover={{ 
+                          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                        }}
                       >
                         {/* Section Mapping Display */}
-                        <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 items-center mb-2 sm:mb-3 md:mb-4">
+                        <motion.div 
+                          className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 items-center mb-2 sm:mb-3 md:mb-4"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.4, delay: 0.1 }}
+                        >
                           {/* Source Section */}
-                          <div className={`${sourceColor.bg} p-1.5 sm:p-3 md:p-4 rounded-lg shadow-sm`}>
+                          <motion.div 
+                            className={`${sourceColor.bg} p-1.5 sm:p-3 md:p-4 rounded-lg shadow-sm`}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            transition={{ duration: 0.2 }}
+                          >
                             <div className="text-center">
                               <div className="text-[9px] sm:text-xs md:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1 md:mb-1.5 leading-tight">{getSourceLabel()}</div>
                               {sourceSection && (
                                 <div className={`text-sm sm:text-lg md:text-xl lg:text-2xl font-bold ${sourceColor.text} leading-tight`}>{sourceSection}</div>
                               )}
                             </div>
-                          </div>
+                          </motion.div>
 
                           {/* Arrow */}
-                          <div className="text-center flex flex-col items-center justify-center px-1">
+                          <motion.div 
+                            className="text-center flex flex-col items-center justify-center px-1"
+                            animate={{ 
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
                             <div className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-blue-600 leading-none">
                               ⇄
                             </div>
                             <div className="text-[9px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">Maps to</div>
-                          </div>
+                          </motion.div>
 
                           {/* Target Section */}
-                          <div className={`${targetColor.bg} p-1.5 sm:p-3 md:p-4 rounded-lg shadow-sm`}>
+                          <motion.div 
+                            className={`${targetColor.bg} p-1.5 sm:p-3 md:p-4 rounded-lg shadow-sm`}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            transition={{ duration: 0.2 }}
+                          >
                             <div className="text-center">
                               <div className="text-[9px] sm:text-xs md:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1 md:mb-1.5 leading-tight">{getTargetLabel()}</div>
                               {targetSection && (
                                 <div className={`text-sm sm:text-lg md:text-xl lg:text-2xl font-bold ${targetColor.text} leading-tight`}>{targetSection}</div>
                               )}
                             </div>
-                          </div>
-                        </div>
+                          </motion.div>
+                        </motion.div>
 
                         {/* Subject and Summary */}
                         <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 pt-2 sm:pt-3 border-t border-gray-100">
@@ -1002,7 +1065,7 @@ export default function LawMapping() {
                             </button>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     </motion.div>
                   );
                     })}

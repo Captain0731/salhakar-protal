@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Navbar from "../components/landing/Navbar";
 import apiService from "../services/api";
 import BookmarkButton from "../components/BookmarkButton";
 import SummaryPopup from "../components/SummaryPopup";
@@ -156,7 +155,6 @@ export default function MappingDetails() {
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -170,7 +168,6 @@ export default function MappingDetails() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <p className="text-red-500 text-lg">{error}</p>
@@ -189,7 +186,6 @@ export default function MappingDetails() {
   if (!mapping) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <p className="text-gray-500 text-lg">No mapping data available</p>
@@ -273,8 +269,7 @@ export default function MappingDetails() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      <div className="pt-16 sm:pt-20">
+      <div>
         <div className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6" style={{ minHeight: 'calc(100vh - 80px)' }}>
           <div className="max-w-7xl mx-auto h-full">
             <div className="space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-6">

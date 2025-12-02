@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import Navbar from "../components/landing/Navbar";
 import Hero from "../components/landing/Hero";
 import Stats from "../components/landing/Stats";
 import Features from "../components/landing/Features";
@@ -28,7 +27,6 @@ function LandingPage() {
 
   return (
     <div className="font-sans bg-white overflow-x-hidden" style={{ scrollBehavior: 'smooth' }}>
-      <Navbar />
       <Hero />
       <div id="features">
         <Features />

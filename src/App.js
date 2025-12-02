@@ -2,7 +2,8 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import GoogleTranslate from "./components/GoogleTranslate";
-import LandingPage from "./pages/LandingPage";
+import PortalLayout from "./components/portal/PortalLayout";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import LegalJudgments from "./pages/LegalJudgments";
 import ViewPDF from "./pages/ViewPDF";
@@ -55,6 +56,8 @@ function AppLayout() {
   
   // Pages where footer should be hidden
   const hideFooterPaths = [
+    '/',
+    '/home',
     '/login',
     '/dashboard',
     '/profile',
@@ -83,8 +86,16 @@ function AppLayout() {
       {shouldShowChatbot && <Chatbot />}
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/home" element={<LandingPage />} />
+        <Route path="/" element={
+          <PortalLayout>
+            <Home />
+          </PortalLayout>
+        } />
+        <Route path="/home" element={
+          <PortalLayout>
+            <Home />
+          </PortalLayout>
+        } />
         <Route path="/login" element={<Login />} />
         {/* Signup route removed - redirecting to login */}
         <Route path="/signup" element={<Login />} />
@@ -100,39 +111,77 @@ function AppLayout() {
         <Route path="/cookie-policy" element={<CookiePolicy />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
         
-        {/* Public Routes - No Authentication Required */}
-        <Route path="/judgment/:id?" element={<ViewPDF />} />
-        <Route path="/law-library" element={<LawLibrary />} />
-        <Route path="/browse-acts" element={<BrowseActs />} />
-        <Route path="/acts/:id" element={<ActDetails />} />
-        <Route path="/mapping-details" element={<MappingDetails />} />
-        <Route path="/law-mapping" element={<LawMapping />} />
-        {/* <Route path="/legal-template" element={<LegalTemplate />} /> */}
-        <Route path="/youtube-summary" element={<YoutubeVideoSummary />} />
-        <Route path="/legal-chatbot" element={<LegalChatbot />} />
-        <Route path="/profile" element={<Profile />} />
-        
-        {/* Additional Routes for Navigation */}
-        <Route path="/judgment-access" element={<LegalJudgments />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        {/* <Route path="/invite-friends" element={<InviteFriends />} /> */}
-        {/* <Route path="/earn-rewards" element={<EarnRewards />} /> */}
-        {/* <Route path="/track-referrals" element={<TrackReferrals />} /> */}
-        
-        {/* Dashboard - Public Route (no login required) */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        
-        {/* Protected Routes - Authentication Required */}
-        <Route path="/notes/:id" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
-        
-        {/* Referral Program Routes */}
-        {/* <Route path="/referral" element={<Referral />} /> */}
-        {/* <Route path="/referral/invite" element={<InviteFriends />} /> */}
-        {/* <Route path="/referral/rewards" element={<EarnRewards />} /> */}
-        {/* <Route path="/referral/track" element={<TrackReferrals />} /> */}
-        
-        {/* {chatbot routes} */}
-        <Route path="/chatbot" element={<LegalChatbot />} />
+        {/* Portal Routes - With Portal Layout */}
+        <Route path="/judgment/:id?" element={
+          <PortalLayout>
+            <ViewPDF />
+          </PortalLayout>
+        } />
+        <Route path="/law-library" element={
+          <PortalLayout>
+            <LawLibrary />
+          </PortalLayout>
+        } />
+        <Route path="/browse-acts" element={
+          <PortalLayout>
+            <BrowseActs />
+          </PortalLayout>
+        } />
+        <Route path="/acts/:id" element={
+          <PortalLayout>
+            <ActDetails />
+          </PortalLayout>
+        } />
+        <Route path="/mapping-details" element={
+          <PortalLayout>
+            <MappingDetails />
+          </PortalLayout>
+        } />
+        <Route path="/law-mapping" element={
+          <PortalLayout>
+            <LawMapping />
+          </PortalLayout>
+        } />
+        <Route path="/youtube-summary" element={
+          <PortalLayout>
+            <YoutubeVideoSummary />
+          </PortalLayout>
+        } />
+        <Route path="/legal-chatbot" element={
+          <PortalLayout>
+            <LegalChatbot />
+          </PortalLayout>
+        } />
+        <Route path="/profile" element={
+          <PortalLayout>
+            <Profile />
+          </PortalLayout>
+        } />
+        <Route path="/judgment-access" element={
+          <PortalLayout>
+            <LegalJudgments />
+          </PortalLayout>
+        } />
+        <Route path="/bookmarks" element={
+          <PortalLayout>
+            <Bookmarks />
+          </PortalLayout>
+        } />
+        <Route path="/dashboard" element={
+          <PortalLayout>
+            <Dashboard />
+          </PortalLayout>
+        } />
+        <Route path="/notes/:id" element={
+          <PortalLayout>
+            <ProtectedRoute><NotesPage /></ProtectedRoute>
+          </PortalLayout>
+        } />
+        <Route path="/chatbot" element={
+          <PortalLayout>
+            <LegalChatbot />
+          </PortalLayout>
+        } />
         
       </Routes>
       {/* Footer - Show on all pages except login, signup, dashboard, and profile */}

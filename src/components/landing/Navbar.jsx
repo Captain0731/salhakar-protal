@@ -241,7 +241,11 @@ const Navbar = () => {
           } ${menuOpen ? "flex opacity-100 translate-y-0" : "hidden md:flex opacity-0 md:opacity-100 -translate-y-2 md:translate-y-0"}`}
           style={{ borderTopColor: '#E5E7EB', zIndex: 9999 }}
         >
-          {navItems.map((item, idx) => (
+          {navItems.map((item, idx) => {
+            // Hide "More" and "About" buttons
+            if (item.label === "More" || item.label === "About") return null;
+            
+            return (
             <li 
               key={idx} 
               className="relative group w-full md:w-auto"
@@ -528,7 +532,8 @@ const Navbar = () => {
                 </ul>
               )}
             </li>
-          ))}
+            );
+          })}
 
           {/* User Profile or Login Button - Mobile */}
           <li className="w-full md:hidden mt-2">

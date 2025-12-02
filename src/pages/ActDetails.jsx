@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import Navbar from "../components/landing/Navbar";
 import apiService from "../services/api";
 import BookmarkButton from "../components/BookmarkButton";
 import { useAuth } from "../contexts/AuthContext";
@@ -417,7 +416,6 @@ export default function ActDetails() {
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -431,7 +429,6 @@ export default function ActDetails() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
         <div className="flex items-center justify-center h-96 px-4">
           <div className="text-center max-w-md w-full">
             <div className="mb-4">
@@ -461,7 +458,6 @@ export default function ActDetails() {
   if (!act) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <p className="text-gray-500 text-lg">No act data available</p>
@@ -479,8 +475,7 @@ export default function ActDetails() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      <div className="pt-16 sm:pt-20">
+      <div>
       
       {/* Responsive Layout: Stacked on mobile, side-by-side on desktop */}
       <div className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6" style={{ minHeight: 'calc(100vh - 80px)', height: isMobile ? 'auto' : 'calc(100vh - 80px)', overflow: isMobile ? 'visible' : 'hidden' }}>

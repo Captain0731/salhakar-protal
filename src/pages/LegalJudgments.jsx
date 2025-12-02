@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../components/landing/Navbar";
 import apiService from "../services/api";
 import { useURLFilters } from "../hooks/useURLFilters";
 import { 
@@ -463,6 +462,22 @@ export default function LegalJudgments() {
     return () => clearTimeout(timeoutId);
   }, [filters.title, filters.cnr, filters.highCourt, filters.judge, filters.petitioner, filters.respondent, filters.decisionDateFrom]);
 
+  // Read courtType from URL parameters on mount and when URL changes
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const urlCourtType = searchParams.get('courtType');
+    if (urlCourtType === 'highcourt' || urlCourtType === 'supremecourt') {
+      if (courtType !== urlCourtType) {
+        setCourtType(urlCourtType);
+      }
+    } else if (!urlCourtType && courtType) {
+      // If no courtType in URL but we have a courtType state, update URL
+      const newSearchParams = new URLSearchParams(location.search);
+      newSearchParams.set('courtType', courtType);
+      navigate(`${location.pathname}?${newSearchParams.toString()}`, { replace: true });
+    }
+  }, [location.search, courtType, navigate, location.pathname]);
+
   // Load initial data when court type changes - Only fetch once
   useEffect(() => {
     if (isInitialMountRef.current) {
@@ -592,26 +607,22 @@ export default function LegalJudgments() {
   ];
 
   return (
-    <div className="min-h-screen animate-fade-in-up overflow-x-hidden" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      
+    <div className="w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
       {/* Enhanced Header Section */}
-      <div className="bg-white border-b border-gray-200 pt-14 sm:pt-16 md:pt-20 animate-slide-in-bottom w-full overflow-x-hidden">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 lg:py-12 w-full">
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 animate-fade-in-up" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
-              Legal Judgments
-            </h1>
-            <div className="w-12 sm:w-16 md:w-20 h-0.5 sm:h-1 mx-auto mb-3 sm:mb-4 md:mb-6 animate-fade-in-up" style={{ backgroundColor: '#CF9B63', animationDelay: '0.2s' }}></div>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg max-w-3xl mx-auto px-2 sm:px-4 animate-fade-in-up" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif', animationDelay: '0.4s' }}>
-              Search and access legal judgments from High Courts and Supreme Court of India
-            </p>
-          </div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
+            Legal Judgments
+          </h1>
+          <div className="w-16 h-1 mx-auto mb-4" style={{ backgroundColor: '#CF9B63' }}></div>
+          <p className="text-sm md:text-base max-w-3xl mx-auto" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif' }}>
+            Search and access legal judgments from High Courts and Supreme Court of India
+          </p>
         </div>
       </div>
 
-      <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full max-w-full overflow-x-hidden">
-        <div className="max-w-7xl mx-auto w-full">
+      <div className="w-full max-w-full overflow-x-hidden">
+        <div className="w-full">
 
           {/* Enhanced Search and Filter Section */}
           <motion.div 
@@ -647,7 +658,12 @@ export default function LegalJudgments() {
                 />
                 
                 <motion.button
-                  onClick={() => setCourtType('highcourt')}
+                  onClick={() => {
+                    setCourtType('highcourt');
+                    const searchParams = new URLSearchParams(location.search);
+                    searchParams.set('courtType', 'highcourt');
+                    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+                  }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`flex-1 sm:flex-none px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all duration-300 relative z-10 text-xs sm:text-sm md:text-base ${
@@ -662,7 +678,12 @@ export default function LegalJudgments() {
                   High Court
                 </motion.button>
                 <motion.button
-                  onClick={() => setCourtType('supremecourt')}
+                  onClick={() => {
+                    setCourtType('supremecourt');
+                    const searchParams = new URLSearchParams(location.search);
+                    searchParams.set('courtType', 'supremecourt');
+                    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+                  }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`flex-1 sm:flex-none px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all duration-300 relative z-10 text-xs sm:text-sm md:text-base ${

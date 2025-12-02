@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/landing/Navbar";
 import { 
   Send, User, X, RotateCcw, Mic, MicOff, Upload, 
   Code, Image, BookOpen, Globe, Copy, ThumbsUp, 
@@ -442,10 +441,8 @@ export default function LegalChatbot() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-
       {/* Modern Chat Interface */}
-      <div className="flex-1 flex flex-col pt-14 sm:pt-16 md:pt-20 w-full overflow-hidden" style={{ backgroundColor: '#F9FAFC' }}>
+      <div className="flex-1 flex flex-col w-full overflow-hidden" style={{ backgroundColor: '#F9FAFC' }}>
         {/* Chat Interface - Always Show */}
         <motion.div
           initial={{ opacity: 0 }}

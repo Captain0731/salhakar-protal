@@ -115,7 +115,7 @@ const Stats = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="text-center mb-8 sm:mb-12">
+        {/* <div className="text-center mb-8 sm:mb-12">
           <h2 
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6"
             style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}
@@ -123,7 +123,7 @@ const Stats = () => {
             We're Good with Numbers
           </h2>
           <div className="w-16 sm:w-20 h-1 mx-auto rounded-full" style={{ backgroundColor: '#CF9B63' }}></div>
-        </div>
+        </div> */}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">

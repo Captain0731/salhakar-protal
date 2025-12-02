@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../components/landing/Navbar";
 import apiService from "../services/api";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import { SkeletonGrid, SmoothTransitionWrapper } from "../components/EnhancedLoadingComponents";
@@ -492,26 +491,22 @@ export default function LawLibrary() {
   }, [activeSection]); // Reload when section changes
 
   return (
-    <div className="min-h-screen animate-fade-in-up overflow-x-hidden" style={{ backgroundColor: '#F9FAFC' }}>
-      <Navbar />
-      
+    <div className="w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
       {/* Enhanced Header Section */}
-      <div className="bg-white border-b border-gray-200 pt-14 sm:pt-16 md:pt-20 animate-slide-in-bottom w-full overflow-x-hidden">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 lg:py-12 w-full">
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 animate-fade-in-up" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
-              Law Library
-            </h1>
-            <div className="w-12 sm:w-16 md:w-20 h-0.5 sm:h-1 mx-auto mb-3 sm:mb-4 md:mb-6 animate-fade-in-up" style={{ backgroundColor: '#CF9B63', animationDelay: '0.2s' }}></div>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg max-w-3xl mx-auto px-2 sm:px-4 animate-fade-in-up" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif', animationDelay: '0.4s' }}>
-              Your comprehensive resource for accessing legal acts, regulations, and legislative documents from across India
-            </p>
-          </div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3" style={{ color: '#1E65AD', fontFamily: 'Helvetica Hebrew Bold, sans-serif' }}>
+            Law Library
+          </h1>
+          <div className="w-16 h-1 mx-auto mb-4" style={{ backgroundColor: '#CF9B63' }}></div>
+          <p className="text-sm md:text-base max-w-3xl mx-auto" style={{ color: '#8C969F', fontFamily: 'Roboto, sans-serif' }}>
+            Your comprehensive resource for accessing legal acts, regulations, and legislative documents from across India
+          </p>
         </div>
       </div>
 
-      <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 w-full max-w-full overflow-x-hidden">
-        <div className="max-w-7xl mx-auto w-full">
+      <div className="w-full max-w-full overflow-x-hidden">
+        <div className="w-full">
 
           {/* Enhanced Search and Filter Section */}
           <motion.div 
